@@ -1,3 +1,6 @@
+// blackjack.cpp : Defines the entry point for the console application.
+//
+
 #include "stdafx.h"
 #include "Players.h"
 #include "blakcjack.h"
@@ -18,14 +21,19 @@ HANDLE getHandleForRead(const char *fileName) {
 	return hFile;
 }
 
-HANDLE getHandleForWrite(const char *fileName) {
+HANDLE getHandleForWrite(const char *fileName, bool create) {
 	HANDLE hFile;
+	DWORD flag;
+	if (create)
+		flag = CREATE_ALWAYS;
+	else
+		flag = OPEN_EXISTING;
 
 	hFile = CreateFileA(fileName,// file to open
 		GENERIC_WRITE,          // open for writing
 		NULL,       // share for writing
 		NULL,                  // default security
-		CREATE_ALWAYS,
+		flag,
 		NULL, // normal file
 		NULL);
 
@@ -35,6 +43,8 @@ HANDLE getHandleForWrite(const char *fileName) {
 }
 
 bool Write(HANDLE hFile, void* buffer, DWORD size, DWORD address) {
+	// sizeul trebuie sa fie lungimea in bytes a bufferului
+
 	DWORD  dwBytesRead = 0;
 	DWORD nrBytesWrite;
 	LARGE_INTEGER add;
@@ -47,10 +57,13 @@ bool Write(HANDLE hFile, void* buffer, DWORD size, DWORD address) {
 	}
 	if (address == -1) {
 		add.LowPart = 0;
-		SetFilePointerEx(hFile, add, 0, FILE_END);
+		//SetFilePointerEx(hFile, add, 0, FILE_END);
+		add.LowPart = GetFileSize(hFile, 0);
+		SetFilePointerEx(hFile, add, 0,FILE_BEGIN);
 	}
 	else SetFilePointerEx(hFile, add, 0, FILE_BEGIN);
 
+	
 	if (false == WriteFile(hFile,
 		buffer,
 		size,
@@ -69,6 +82,7 @@ bool Write(HANDLE hFile, void* buffer, DWORD size, DWORD address) {
 }
 
 BYTE* read(HANDLE hFile, DWORD address, DWORD size) {
+	// citeste binar
 	DWORD nrBytesRead, nrBytesToRead;
 	DWORD  dwBytesRead = 0;
 	BYTE* buffer;
@@ -108,5 +122,7 @@ BYTE* read(HANDLE hFile, DWORD address, DWORD size) {
 int main()
 {
 	game mGame;
+
     return 0;
 }
+
